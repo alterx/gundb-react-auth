@@ -526,16 +526,14 @@ var GunProvider = function GunProvider(_ref) {
     throw new Error("Provide peers, Gun and sea");
   }
 
-  var newGunInstance = function newGunInstance() {
-    return function (opts) {
-      if (opts === void 0) {
-        opts = {
-          peers: peers
-        };
-      }
+  var newGunInstance = function newGunInstance(opts) {
+    if (opts === void 0) {
+      opts = {
+        peers: peers
+      };
+    }
 
-      return Gun(opts);
-    };
+    return Gun(opts);
   };
 
   var _useState = React.useState(function () {

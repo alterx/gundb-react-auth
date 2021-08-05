@@ -27,7 +27,7 @@ const GunProvider = ({ peers, Gun, sea, keyFieldName = 'keys', ...props }) => {
     throw new Error(`Provide peers, Gun and sea`);
   }
 
-  const newGunInstance = () => (opts = { peers }) => {
+  const newGunInstance = (opts = { peers }) => {
     return Gun(opts);
   };
 

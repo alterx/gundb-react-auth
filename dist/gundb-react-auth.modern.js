@@ -524,7 +524,7 @@ const GunProvider = (_ref) => {
     throw new Error(`Provide peers, Gun and sea`);
   }
 
-  const newGunInstance = () => (opts = {
+  const newGunInstance = (opts = {
     peers
   }) => {
     return Gun(opts);
