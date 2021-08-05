@@ -1,0 +1,28 @@
+{
+  "name": "@altrx/gundb-react-auth",
+  "version": "0.1.0",
+  "description": "GUNDB Auth Provider for React/Preact",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alterx/gundb-react-auth.git"
+  },
+  "author": "Carlos Vega",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alterx/gundb-react-auth/issues"
+  },
+  "sideEffects": false,
+  "browser": "dist/gundb-react-auth.umd.js",
+  "umd:main": "dist/gundb-react-auth.umd.js",
+  "jsnext:main": "dist/gundb-react-auth.modern.js",
+  "main": "dist/gundb-react-auth.js",
+  "module": "dist/gundb-react-auth.module.js",
+  "unpkg": "dist/gundb-react-auth.umd.js",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "typings": "./dist/index.d.ts",
+  "peerDependencies": {
+    "preact": ">=10"
+  }
+}
