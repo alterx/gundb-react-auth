@@ -524,11 +524,17 @@ const GunProvider = (_ref) => {
     throw new Error(`Provide peers, Gun and sea`);
   }
 
+  const newGunInstance = () => (opts = {
+    peers
+  }) => {
+    return Gun(opts);
+  };
+
   const [isReadyToAuth, setReadyToAuth] = useState(() => !!(localStorage.getItem(keyFieldName) || ''));
   const [gun] = gundbReactHooks_umd.useGun(Gun, {
     peers
   });
-  const [appKeys, setAppKeys] = gundbReactHooks_umd.useGunKeys(sea, () => JSON.parse(localStorage.getItem(keyFieldName) || "null"));
+  const [appKeys, setAppKeys] = gundbReactHooks_umd.useGunKeys(sea, () => JSON.parse(localStorage.getItem(keyFieldName) || 'null'));
   const [user, isLoggedIn] = gundbReactHooks_umd.useGunKeyAuth(gun, appKeys, isReadyToAuth);
   useEffect(() => {
     if (isLoggedIn) {
@@ -558,8 +564,9 @@ const GunProvider = (_ref) => {
     logout,
     sea,
     appKeys,
-    isLoggedIn
-  }), [login, logout, user, appKeys, isLoggedIn]);
+    isLoggedIn,
+    newGunInstance
+  }), [login, logout, user, appKeys, isLoggedIn, newGunInstance]);
   return React.createElement(GunContext.Provider, Object.assign({
     value: value
   }, props));

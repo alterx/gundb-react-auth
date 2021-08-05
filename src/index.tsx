@@ -9,15 +9,15 @@ type KeyPair = {
 };
 
 type GunContextType = {
-  user,
-  login: (keys: undefined | string | KeyPair) => void,
-  logout: () => void,
-  sea,
-  appKeys:  undefined | string | KeyPair,
-  isLoggedIn: boolean,
-  displayName: string,
-  Provider,
-}
+  user;
+  login: (keys: undefined | string | KeyPair) => void;
+  logout: () => void;
+  sea;
+  appKeys: undefined | string | KeyPair;
+  isLoggedIn: boolean;
+  displayName: string;
+  Provider;
+};
 
 const GunContext: GunContextType = React.createContext<GunContextType>({});
 GunContext.displayName = 'GunContext';
@@ -27,13 +27,17 @@ const GunProvider = ({ peers, Gun, sea, keyFieldName = 'keys', ...props }) => {
     throw new Error(`Provide peers, Gun and sea`);
   }
 
+  const newGunInstance = () => (opts = { peers }) => {
+    return Gun(opts);
+  };
+
   const [isReadyToAuth, setReadyToAuth] = useState(
     () => !!(localStorage.getItem(keyFieldName) || '')
   );
 
   const [gun] = useGun(Gun, { peers });
   const [appKeys, setAppKeys] = useGunKeys(sea, () =>
-    JSON.parse(localStorage.getItem(keyFieldName) || "null")
+    JSON.parse(localStorage.getItem(keyFieldName) || 'null')
   );
   const [user, isLoggedIn] = useGunKeyAuth(gun, appKeys, isReadyToAuth);
 
@@ -65,8 +69,8 @@ const GunProvider = ({ peers, Gun, sea, keyFieldName = 'keys', ...props }) => {
   }, []);
 
   const value = React.useMemo(
-    () => ({ user, login, logout, sea, appKeys, isLoggedIn }),
-    [login, logout, user, appKeys, isLoggedIn]
+    () => ({ user, login, logout, sea, appKeys, isLoggedIn, newGunInstance }),
+    [login, logout, user, appKeys, isLoggedIn, newGunInstance]
   );
 
   return <GunContext.Provider value={value} {...props} />;

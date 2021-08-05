@@ -528,6 +528,18 @@
       throw new Error("Provide peers, Gun and sea");
     }
 
+    var newGunInstance = function newGunInstance() {
+      return function (opts) {
+        if (opts === void 0) {
+          opts = {
+            peers: peers
+          };
+        }
+
+        return Gun(opts);
+      };
+    };
+
     var _useState = React.useState(function () {
       return !!(localStorage.getItem(keyFieldName) || '');
     }),
@@ -540,7 +552,7 @@
         gun = _useGun[0];
 
     var _useGunKeys = gundbReactHooks_umd.useGunKeys(sea, function () {
-      return JSON.parse(localStorage.getItem(keyFieldName) || "null");
+      return JSON.parse(localStorage.getItem(keyFieldName) || 'null');
     }),
         appKeys = _useGunKeys[0],
         setAppKeys = _useGunKeys[1];
@@ -583,9 +595,10 @@
         logout: logout,
         sea: sea,
         appKeys: appKeys,
-        isLoggedIn: isLoggedIn
+        isLoggedIn: isLoggedIn,
+        newGunInstance: newGunInstance
       };
-    }, [login, logout, user, appKeys, isLoggedIn]);
+    }, [login, logout, user, appKeys, isLoggedIn, newGunInstance]);
     return React__default.createElement(GunContext.Provider, Object.assign({
       value: value
     }, props));
