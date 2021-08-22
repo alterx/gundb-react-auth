@@ -9,8 +9,9 @@ declare type ProviderOpts = {
     sea: any;
     keyFieldName: string;
     storage: Storage;
+    gunOpts: any;
     [key: string]: any;
 };
-declare const GunProvider: ({ peers, Gun, sea, keyFieldName, storage, ...props }: ProviderOpts) => any;
+declare const GunProvider: ({ peers, Gun, sea, keyFieldName, storage, gunOpts, ...props }: ProviderOpts) => any;
 declare function useAuth(): any;
 export { GunProvider, useAuth };
