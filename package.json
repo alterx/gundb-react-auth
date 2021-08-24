@@ -1,6 +1,6 @@
 {
   "name": "@altrx/gundb-react-auth",
-  "version": "0.3.5",
+  "version": "0.4.0",
   "description": "GUNDB Auth Provider for React/Preact",
   "browser": "./dist/gundb-react-auth.umd.js",
   "umd:main": "./dist/gundb-react-auth.umd.js",
@@ -60,7 +60,7 @@
     "build": "rimraf dist && npm run build:preact && npm run build:react",
     "build:react": "microbundle --define process.env.NODE_ENV=production  --jsx React.createElement --external react --name @altrx/gundb-react-auth --no-compress --output dist/",
     "build:preact": "microbundle --define process.env.NODE_ENV=production --jsx React.createElement  --external preact --name @altrx/gundb-react-auth --no-compress --output preact/dist --alias react=preact/hooks",
-    "dev": "microbundle watch",
+    "dev": "microbundle watch --jsx React.createElement",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Carlos Vega",
@@ -85,6 +85,6 @@
     }
   },
   "dependencies": {
-    "@altrx/gundb-react-hooks": "^0.8.1"
+    "@altrx/gundb-react-hooks": "0.9.3"
   }
 }

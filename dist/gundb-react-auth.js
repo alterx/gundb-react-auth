@@ -154,22 +154,29 @@ var gundbReactHooks_umd = createCommonjsModule(function (module, exports) {
     };
 
     var useGun = function useGun(Gun, opts) {
-      var _useState = react.useState(Gun(opts)),
-          gun = _useState[0];
+      var _useState = react.useState(Gun(_extends({}, opts))),
+          gun = _useState[0],
+          setGun = _useState[1];
 
-      return [gun];
+      react.useEffect(function () {
+        if (opts) {
+          setGun(Gun(_extends({}, opts)));
+        }
+      }, [Gun, opts]);
+      return gun;
     };
 
-    var useGunNamespace = function useGunNamespace(gun) {
-      var _useState2 = react.useState(null),
+    var useGunNamespace = function useGunNamespace(gun, soul) {
+      var _useState2 = react.useState(soul ? gun.user(soul) : gun.user()),
           namespace = _useState2[0],
           setNamespace = _useState2[1];
 
-      if (!namespace) {
-        setNamespace(gun.user());
-      }
-
-      return [namespace];
+      react.useEffect(function () {
+        if (gun && !namespace) {
+          setNamespace(soul ? gun.user(soul) : gun.user());
+        }
+      }, [namespace, gun, soul]);
+      return namespace;
     };
 
     var useGunKeyAuth = function useGunKeyAuth(gun, keys, triggerAuth) {
@@ -179,8 +186,7 @@ var gundbReactHooks_umd = createCommonjsModule(function (module, exports) {
       // or, if false, returns a namespaced gun node
 
 
-      var _useGunNamespace = useGunNamespace(gun),
-          namespacedGraph = _useGunNamespace[0];
+      var namespacedGraph = useGunNamespace(gun);
 
       var _useState3 = react.useState(false),
           isLoggedIn = _useState3[0],
@@ -197,26 +203,31 @@ var gundbReactHooks_umd = createCommonjsModule(function (module, exports) {
       return [namespacedGraph, isLoggedIn];
     };
 
-    var useGunKeys = function useGunKeys(sea, initialValue) {
-      var getKeySet = function getKeySet() {
-        try {
-          return Promise.resolve(sea.pair()).then(function (pair) {
-            setKeys(pair);
-          });
-        } catch (e) {
-          return Promise.reject(e);
+    var useGunKeys = function useGunKeys(sea, existingKeys) {
+      var _useState4 = react.useState(existingKeys),
+          newKeys = _useState4[0],
+          setNewKeys = _useState4[1];
+
+      react.useEffect(function () {
+        var getKeySet = function getKeySet() {
+          try {
+            return Promise.resolve(sea.pair()).then(function (pair) {
+              setNewKeys(pair);
+            });
+          } catch (e) {
+            return Promise.reject(e);
+          }
+        };
+
+        if (!newKeys && !existingKeys) {
+          getKeySet();
         }
-      };
 
-      var _useState4 = react.useState(initialValue),
-          keys = _useState4[0],
-          setKeys = _useState4[1];
-
-      if (!keys) {
-        getKeySet();
-      }
-
-      return [keys, setKeys];
+        if (existingKeys) {
+          setNewKeys(existingKeys);
+        }
+      }, [existingKeys, newKeys, sea]);
+      return newKeys;
     };
 
     var useGunState = function useGunState(ref, opts) {
@@ -309,7 +320,7 @@ var gundbReactHooks_umd = createCommonjsModule(function (module, exports) {
           return Promise.resolve(encryptData(data, appKeys, sea)).then(function (encryptedData) {
             return Promise.resolve(new Promise(function (resolve, reject) {
               return gunAppGraph.put(encryptedData, function (ack) {
-                return ack.err ? reject(ack.err) : resolve();
+                return ack.err ? reject(ack.err) : resolve(data);
               });
             })).then(function () {});
           });
@@ -322,7 +333,7 @@ var gundbReactHooks_umd = createCommonjsModule(function (module, exports) {
         try {
           return Promise.resolve(new Promise(function (resolve, reject) {
             return gunAppGraph.put(null, function (ack) {
-              return ack.err ? reject(ack.err) : resolve();
+              return ack.err ? reject(ack.err) : resolve(field);
             });
           })).then(function () {
             dispatch({
@@ -434,7 +445,7 @@ var gundbReactHooks_umd = createCommonjsModule(function (module, exports) {
           return Promise.resolve(encryptData(data, appKeys, sea)).then(function (encryptedData) {
             return Promise.resolve(new Promise(function (resolve, reject) {
               return gunAppGraph.get(nodeID).put(encryptedData, function (ack) {
-                return ack.err ? reject(ack.err) : resolve();
+                return ack.err ? reject(ack.err) : resolve(data);
               });
             })).then(function () {
               dispatch({
@@ -457,13 +468,13 @@ var gundbReactHooks_umd = createCommonjsModule(function (module, exports) {
               if (!nodeID) {
                 return Promise.resolve(new Promise(function (resolve, reject) {
                   return gunAppGraph.set(encryptedData, function (ack) {
-                    return ack.err ? reject(ack.err) : resolve();
+                    return ack.err ? reject(ack.err) : resolve(data);
                   });
                 })).then(function () {});
               } else {
                 return Promise.resolve(new Promise(function (resolve, reject) {
                   return gunAppGraph.get(nodeID).put(encryptedData, function (ack) {
-                    return ack.err ? reject(ack.err) : resolve();
+                    return ack.err ? reject(ack.err) : resolve(data);
                   });
                 })).then(function () {});
               }
@@ -480,7 +491,7 @@ var gundbReactHooks_umd = createCommonjsModule(function (module, exports) {
         try {
           return Promise.resolve(new Promise(function (resolve, reject) {
             return gunAppGraph.get(nodeID).put(null, function (ack) {
-              return ack.err ? reject(ack.err) : resolve();
+              return ack.err ? reject(ack.err) : resolve(nodeID);
             });
           })).then(function () {});
         } catch (e) {
@@ -515,55 +526,42 @@ var GunContext = React__default.createContext({});
 GunContext.displayName = 'GunContext';
 
 var GunProvider = function GunProvider(_ref) {
-  var peers = _ref.peers,
-      Gun = _ref.Gun,
+  var Gun = _ref.Gun,
       sea = _ref.sea,
       _ref$keyFieldName = _ref.keyFieldName,
       keyFieldName = _ref$keyFieldName === void 0 ? 'keys' : _ref$keyFieldName,
       storage = _ref.storage,
       gunOpts = _ref.gunOpts,
-      props = _objectWithoutPropertiesLoose(_ref, ["peers", "Gun", "sea", "keyFieldName", "storage", "gunOpts"]);
+      props = _objectWithoutPropertiesLoose(_ref, ["Gun", "sea", "keyFieldName", "storage", "gunOpts"]);
 
-  if (!sea || !Gun || !peers) {
-    throw new Error("Provide peers, Gun and sea");
+  if (!sea || !Gun || !gunOpts) {
+    throw new Error("Provide gunOpts, Gun and sea");
   }
 
-  var newGunInstance = function newGunInstance(opts) {
-    if (opts === void 0) {
-      opts = {
-        peers: peers
-      };
-    }
-
-    return Gun(opts);
-  };
-
-  var _useState = React.useState(''),
-      isReadyToAuth = _useState[0],
-      setReadyToAuth = _useState[1];
-
-  var _useState2 = React.useState(''),
-      existingKeysStatus = _useState2[0],
-      setExistingKeysStatus = _useState2[1];
-
-  var _useGun = gundbReactHooks_umd.useGun(Gun, gunOpts || {
-    peers: peers
+  var _useState = React.useState({
+    isReadyToAuth: '',
+    existingKeys: null,
+    keyStatus: ''
   }),
-      gun = _useGun[0];
+      _useState$ = _useState[0],
+      isReadyToAuth = _useState$.isReadyToAuth,
+      existingKeys = _useState$.existingKeys,
+      keyStatus = _useState$.keyStatus,
+      setStatuses = _useState[1];
 
-  var _useGunKeys = gundbReactHooks_umd.useGunKeys(sea, null),
-      appKeys = _useGunKeys[0],
-      setAppKeys = _useGunKeys[1];
+  var gun = gundbReactHooks_umd.useGun(Gun, gunOpts); // new keypair
 
-  var _useGunKeyAuth = gundbReactHooks_umd.useGunKeyAuth(gun, appKeys, isReadyToAuth === 'ready'),
+  var newKeys = gundbReactHooks_umd.useGunKeys(sea);
+
+  var _useGunKeyAuth = gundbReactHooks_umd.useGunKeyAuth(gun, existingKeys, isReadyToAuth === 'ready'),
       user = _useGunKeyAuth[0],
       isLoggedIn = _useGunKeyAuth[1];
 
   React.useEffect(function () {
-    if (isLoggedIn && existingKeysStatus === 'notpresent') {
+    if (isLoggedIn && existingKeys && keyStatus === 'new') {
       var storeKeys = function storeKeys() {
         try {
-          return Promise.resolve(storage.setItem(keyFieldName, JSON.stringify(appKeys))).then(function () {});
+          return Promise.resolve(storage.setItem(keyFieldName, JSON.stringify(existingKeys))).then(function () {});
         } catch (e) {
           return Promise.reject(e);
         }
@@ -571,16 +569,18 @@ var GunProvider = function GunProvider(_ref) {
 
       storeKeys();
     }
-  }, [isLoggedIn, appKeys, existingKeysStatus, keyFieldName, storage]);
+  }, [isLoggedIn, existingKeys, keyFieldName, storage, keyStatus, user]);
   React.useEffect(function () {
-    if (existingKeysStatus === '') {
+    if (!existingKeys) {
       var getKeys = function getKeys() {
         try {
           return Promise.resolve(storage.getItem(keyFieldName)).then(function (k) {
             var ks = JSON.parse(k || 'null');
-            setAppKeys(ks);
-            setExistingKeysStatus(ks ? 'present' : 'notpresent');
-            setReadyToAuth('ready');
+            setStatuses({
+              isReadyToAuth: 'ready',
+              existingKeys: ks,
+              keyStatus: ks ? 'existing' : 'new'
+            });
           });
         } catch (e) {
           return Promise.reject(e);
@@ -589,46 +589,53 @@ var GunProvider = function GunProvider(_ref) {
 
       getKeys();
     }
-  }, [storage, keyFieldName, existingKeysStatus, setExistingKeysStatus, setReadyToAuth, setAppKeys]);
+  }, [storage, keyFieldName, setStatuses, existingKeys]);
   var login = React__default.useCallback(function (keys) {
     try {
-      if (keys) {
-        // This function is called when the user inputs existing
-        // keys. In that case, we wanna make sure `appKeys` contains those instead
-        // of the ones that were generated by the `useGunKeys` hook.
-        setAppKeys(keys);
-      } // We tell Gun we're ready to perform the authentication, either with existing
-      // keys or the ones generated by the `useGunKeys` hook.
-
-
-      setReadyToAuth('ready');
+      // use keys sent by the user or a new set
+      setStatuses({
+        isReadyToAuth: 'ready',
+        existingKeys: keys || newKeys,
+        keyStatus: 'new'
+      });
       return Promise.resolve();
     } catch (e) {
       return Promise.reject(e);
     }
-  }, [setAppKeys, existingKeysStatus, setReadyToAuth]);
-  var logout = React__default.useCallback(function () {
+  }, [setStatuses, newKeys]);
+  var logout = React__default.useCallback(function (onLoggedOut) {
     var removeKeys = function removeKeys() {
       try {
-        return Promise.resolve(storage.removeItem(keyFieldName)).then(function () {});
+        return Promise.resolve(storage.removeItem(keyFieldName)).then(function () {
+          onLoggedOut();
+        });
       } catch (e) {
         return Promise.reject(e);
       }
     };
 
     removeKeys();
-  }, []);
+  }, [keyFieldName, storage]);
   var value = React__default.useMemo(function () {
+    var newGunInstance = function newGunInstance(opts) {
+      if (opts === void 0) {
+        opts = gunOpts;
+      }
+
+      return Gun(opts);
+    };
+
     return {
+      gun: gun,
       user: user,
       login: login,
       logout: logout,
       sea: sea,
-      appKeys: appKeys,
+      appKeys: existingKeys || newKeys,
       isLoggedIn: isLoggedIn,
       newGunInstance: newGunInstance
     };
-  }, [login, logout, user, appKeys, isLoggedIn, newGunInstance]);
+  }, [gun, user, login, logout, sea, newKeys, existingKeys, isLoggedIn, Gun, gunOpts]);
   return React__default.createElement(GunContext.Provider, Object.assign({
     value: value
   }, props));

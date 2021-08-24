@@ -4,7 +4,6 @@ declare type Storage = {
     removeItem: (key: string) => any;
 };
 declare type ProviderOpts = {
-    peers: [];
     Gun: any;
     sea: any;
     keyFieldName: string;
@@ -12,6 +11,6 @@ declare type ProviderOpts = {
     gunOpts: any;
     [key: string]: any;
 };
-declare const GunProvider: ({ peers, Gun, sea, keyFieldName, storage, gunOpts, ...props }: ProviderOpts) => any;
+declare const GunProvider: ({ Gun, sea, keyFieldName, storage, gunOpts, ...props }: ProviderOpts) => any;
 declare function useAuth(): any;
 export { GunProvider, useAuth };
