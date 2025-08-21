@@ -1,3 +1,5 @@
+# DEPRECATED: the functionality provided by this package has been transferred to https://github.com/alterx/gundb-react-hooks 
+
 # GunDB React Auth Provider
 
 This is a set of providers for initializing GunDB Auth
